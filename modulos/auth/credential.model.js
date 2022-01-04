@@ -19,8 +19,8 @@ var credentialSchema = new Schema({
     email: { type: String, unique: true, required: [false, 'El correo es necesario'] },
     role: { type: String, required: true, default: 'USER_ROLE' },
     roles: [String],
-    verify:  { type: Boolean, required: true, default:false },
-    estatus: Boolean
+    verify:  { type: Boolean, required: true, default:true },
+    estatus: { type: Boolean, required: true, default:true }
 });
 
 credentialSchema.plugin(uniqueValidator, { message: '{PATH} debe de ser único' });

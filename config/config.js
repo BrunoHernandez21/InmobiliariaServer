@@ -2,7 +2,7 @@ module.exports.SEED = 'seed-brunod';
 module.exports.EXPIRES_IN = '2d';
 module.exports.SESSION_EXPIRES_AT = '2d';
 
-
+//con exactitud que rayos hace esto?
 module.exports.configMail = {
     host: 'mail.inc4.uno',
     port: 465,
