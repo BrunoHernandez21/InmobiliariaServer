@@ -22,11 +22,9 @@ app.use(bodyParser.json())
 //      Creacion de las rutas
 //          Declaracion
 var auth = require ('./modulos/auth/auth.routes');                              //✓ Solo para logiar
-var tareasRoutes = require ('./modulos/tarea/tarea.routes');                    //✓
-var usuariosRoutes = require ('./modulos/admin/usuarios/usuario.routes');       //✓ info de las personas
+var tareasRoutes = require ('./modulos/tarea/tarea.routes');                    //✓ Las tareas
 //          implementacion
 app.use('/api/auth', auth);
 app.use('/api/tarea', tareasRoutes);
-app.use('/api/usuario', usuariosRoutes);
 
 module.exports = app;

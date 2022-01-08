@@ -2,19 +2,17 @@ var jwt = require('jsonwebtoken');
 
 var SEED = require('../config/config').SEED;
 var ApiKey = require('../models/administracion/api-key');
-var Role = require('../models/administracion/role');
 
-// ==========================================
-//  Verificar token
-// ==========================================
+/////////////////// Traductor o estandarizador de datos///////////////// 
+
+// solo checa si la secion esta activa
+// comparando el token (llave o cadena de texto)
+// con la cadena de texto en la base de datos
 exports.verificaToken = function(req, res, next) {
+    //const token = req.get('authorization')?.split(' ')[1] || req.get('token') || '';
 
-    //var token = req.query.token;
-    const token = req.get('authorization')?.split(' ')[1] || req.get('token') || '';
-    //token = token.replace('Bearer ')
-
-
-
+    //se utiliza body o get porque puede ser post o ser put la peticion
+    const token = req.body.token || req.get('token')||'';
     jwt.verify(token, SEED, (err, decoded) => {
         if (err) {
             return res.status(401).json({
@@ -23,27 +21,25 @@ exports.verificaToken = function(req, res, next) {
                 errors: err
             });
         }
-
-        req.usuario = decoded.usuario;
+        req.usuario = decoded.usuario;//? porque hacer esto
         req.partner = decoded.partner;
         next();
     });
-
 }
 
 
-exports.verificaApiKey = function(req, res, next) {
+/* // De momento esto esta inutilizado
 
+
+// apikey es una extructura de datos hija de mongoso que adquiere sus propiedades como 
+// encontrar una coincidencia de esas propiedades en la base de datos
+// seria preferible estandarizar los nombres para no repetir token
+exports.verificaApiKey = function(req, res, next) {
     const token = req.get('API-KEY') || '';
     var origin = req.get('origin');
     var host = req.get('host');
-
     var host = origin?origin:host;
-
-    console.log('host  : ' + host + ' apikey  : ' + token);
-
     ApiKey.findOne({host:host, apikey: token}, (err, info) => {
-
         if (err) {
             return res.status(401).json({
                 ok: false,
@@ -61,30 +57,5 @@ exports.verificaApiKey = function(req, res, next) {
                 errors: err
             });
         }
-        
     });
-
-}
-
-// ==========================================
-//  Verificar ADMIN
-// ==========================================
-exports.verificaADMIN_ROLE = function(req, res, next) {
-    var usuario = req.usuario;
-
-    if (usuario.role === 'ADMIN_ROLE') {
-        next();
-    } else {
-
-        return res.status(401).json({
-            ok: false,
-            mensaje: 'Token incorrecto de administración',
-            errors: { message: 'No es administrador' }
-        });
-
-    }
-
-
-}
-
-
+}*/

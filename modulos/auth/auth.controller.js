@@ -1,16 +1,13 @@
 var bcrypt = require('bcryptjs');
+const { validationResult } = require('express-validator');
 var jwt = require('jsonwebtoken');
 var Partner = require('../../models/administracion/partner');
-// Load the MySQL pool connection
-//const poolMysql = require('../../data/mariadb_config');
-//var MailController = require('../../controllers/mail/mail.controller'); luego me encargo de esto
-
 var SEED = require('../../config/config').SEED;
 var Credential = require('./credential.model');
 
 
 const SESSION_EXPIRES_AT = require('../../config/config').SESSION_EXPIRES_AT;
-
+//determina el tiempo para que expire la session
 const payloadJwt = {
     expiresIn: SESSION_EXPIRES_AT
     //expiresIn: 14400
@@ -23,11 +20,24 @@ const payloadJwt = {
 
 //  Inicio de secion
 function login(req, res) {
+    //verifica si tiene la forma necesaria para el login
+    const errors = validationResult(req);
+    console.log(errors);
+    if (!errors.isEmpty()){
+        console.log(errors);
+        return res.status(400).json({
+            ok:false,
+            errors: errors.mapped()
+        })
+    }
+    //comprobacion personal del login
     var body = req.body;
-    let filterUser = {email: body.email};
-    Credential.findOne(filterUser) 
-        .select('email img password name surname role roles partner estatus partner')
-        .exec(async (err, usuarioDB) => {
+    let credentialUser = {email: body.email};
+    // En el objeto mongose utiliza la funcion buscar a un {email:email} 
+    // si lo encuentras selecciona {caracteristicas} 
+    // y ejecuta
+    Credential.findOne(credentialUser).exec(async (err, usuarioDB) => {
+        console.log(usuarioDB);
 
             if (err) {
                 return res.status(500).json({
@@ -36,15 +46,15 @@ function login(req, res) {
                     errors: err
                 });
             }
-
+            //No encontro el correo
             if (!usuarioDB) {
                 return res.status(400).json({
                     ok: false,
-                    mensaje: 'Credenciales incorrectas, email no registrado',
+                    mensaje: 'Email no registrado',
                     errors: err
                 });
             }
-
+            //checa el estatus del usuario
             if (usuarioDB.estatus !== true) {
                 return res.status(400).json({
                     ok: false,
@@ -52,20 +62,16 @@ function login(req, res) {
                     errors: err
                 });
             }
-            let user = {
-                email: usuarioDB.email,
-                name: usuarioDB.name,
-                surname: usuarioDB.surname,
-                _id: usuarioDB._id,
-                role: usuarioDB.role,
-                roles: usuarioDB.roles,
-                img: usuarioDB.img
-            };
+            // instancia la informacion obtenida en un mapa user
 
+            let user = JSON.parse(JSON.stringify(usuarioDB));
+            delete user['password'];
+
+            // y lo mete dentro de otro mapa payload con la llave usuario
             let payload = {
-                usuario: user,
+                keys: user,
             };
-
+            //comprueba si la contraseña es correcta
             if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
                 return res.status(400).json({
                     ok: false,
@@ -73,26 +79,30 @@ function login(req, res) {
                     errors: err
                 });
             }
-
+            // inicia secion con el usuario en payload
             var token = jwt.sign(payload, SEED, payloadJwt);
-
-
+            //ok
             res.status(200).json({
                 ok: true,
-                usuario: user,
+                user: user,
                 token: token
-                //menu: data
             });
-
-
         });
 };
 //inicio de seccion por ID token
 function renuevaToken(req, res) {
-    //const token = req.get('authorization') || '';
-    const token = req.body.accessToken || 'XXX';
+    //verifica si tiene el token
+    const errors = validationResult(req);
+    console.log(errors);
+    if (!errors.isEmpty()){
+        console.log(errors);
+        return res.status(400).json({
+            ok:false,
+            errors: errors.mapped()
+        })
+    }
 
-
+    const token = req.body.accessToken;
     jwt.verify(token, SEED, (err, decoded) => {
         console.log(decoded);
         if (err) {
@@ -102,9 +112,7 @@ function renuevaToken(req, res) {
                 errors: err
             });
         }
-
         var tokenNew = jwt.sign({usuario: decoded.usuario}, SEED, payloadJwt);
-
         res.status(200).json({
             authenticated: true,
             token: tokenNew
@@ -117,15 +125,22 @@ function renuevaToken(req, res) {
 
 // Crear un nuevo usuario
 function crearUsuario(req, res) {
-    var body = req.body;
-    var usuario = new Credential({...body});
-
-    if (body.password !== null && body.password !== undefined && body.password !== '') {
-        usuario.password = bcrypt.hashSync(body.password, 10);
-    } else {
-        usuario.password = bcrypt.hashSync('123456', 10);
+    //verifica si tiene la forma necesaria para el login
+    
+    const errors = validationResult(req);
+    console.log(errors);
+    if (!errors.isEmpty()){
+        console.log(errors);
+        return res.status(400).json({
+            ok:false,
+            errors: errors.mapped()
+        })
     }
 
+    /////////////
+    var body = req.body;
+    var usuario = new Credential({...body});
+    usuario.password = bcrypt.hashSync(body.password, 10);
     usuario.save(async (err, usuarioGuardado) => {
         if (err) {
             console.log('err :>> ', err);
@@ -135,7 +150,6 @@ function crearUsuario(req, res) {
                 errors: err
             });
         }
-        
         var token = jwt.sign({usuario: usuario}, SEED, {expiresIn: 14400}); // 4 horas
         res.status(201).json({
             ok: true,
@@ -150,11 +164,6 @@ function crearUsuario(req, res) {
 function cambiarPassword(req, res) {
     var id = req.params.id;
     var body = req.body;
-
-    if(!(req.usuario.role==='ROOT_USER' || req.usuario.role==='ADMIN_USER')){
-        id = req.usuario._id;
-    }
-
     Credential.findById(id, (err, usuario) => {
         if (err) {
             return res.status(500).json({
@@ -163,7 +172,6 @@ function cambiarPassword(req, res) {
                 errors: err
             });
         }
-
         if (!usuario) {
             return res.status(400).json({
                 ok: false,
@@ -172,10 +180,7 @@ function cambiarPassword(req, res) {
             });
         }
         usuario.password = bcrypt.hashSync(body.password, 10);
-
-
         usuario.save( (err, usuarioGuardado) => {
-
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -183,7 +188,6 @@ function cambiarPassword(req, res) {
                     errors: err
                 });
             }
-
             let userx = {
                 _id: usuarioGuardado._id,
                 name: usuarioGuardado.name,
@@ -194,17 +198,13 @@ function cambiarPassword(req, res) {
             };
             var tokenUser = jwt.sign({usuario: userx}, SEED, {expiresIn: 14400});
             console.log(tokenUser);
-
             res.status(200).json({
                 ok: true,
                 usuario: userx,
                 token: tokenUser
             });
-
         });
-
     });
-
 }
 
 
