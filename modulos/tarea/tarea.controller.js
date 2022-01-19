@@ -51,7 +51,7 @@ function catalogoEstados(req, res){
     );
 }
 /**
- * Consulta las tareas por paginas, por default pageSize=10, page=1
+ * Consulta las tareas por paginas, por default pageSize=10, page=1, {nombreCliente, fechaAvaluo, estatus}
  * @param req Request de la peticion
  * @param res Respuesta de la peticion
  */
