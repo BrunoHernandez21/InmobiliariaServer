@@ -66,6 +66,9 @@ function consultaPaginado(req, res){
     desde = Number(desde);
 
     let findTerms = {};
+    //findTerms['user']=req.user._id;
+    //findTerms['owner']=req.user._id;
+
 
 
     if(req.body){
@@ -113,9 +116,39 @@ function consultaPaginado(req, res){
     })
 }
 
+function actualizarTarea(req, res){
+    var id = req.params.id;
+    var body = req.body;
+
+    Tarea.findByIdAndUpdate(id, body, {new:true}, (err, partner) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar partner',
+                errors: err
+            });
+        }
+        if (!partner) {
+            res.status(400).json({
+                ok: false,
+                mensaje: 'El partner con id ' + id + ' no existe',
+                errors: { message: 'No existe un partner con ese ID' }
+            });
+        }else{
+            res.status(200).json({
+                ok: true,
+                partner: partner
+            });
+        }
+    });
+
+
+}
+
 module.exports={
     crear,
     consulta,
     consultaPaginado,
-    catalogoEstados
+    catalogoEstados,
+    actualizarTarea
 };

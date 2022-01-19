@@ -19,7 +19,6 @@ var credentialSchema = new Schema({
     roles: [String],
     verify:  { type: Boolean, required: true, default:false},
     estatus: { type: Boolean, required: true, default:true},
-    estatus: { type: Boolean, required: true, default:true},
     //info fields
     name: { type: String, required: true },
     lastname: { type: String, required: true },
