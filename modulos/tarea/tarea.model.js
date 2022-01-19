@@ -31,7 +31,7 @@ var TareaSchema = new Schema({
     descuento:{ type: String},
     duracion:{ type: String},
     hora:{ type: String},
-    fechaAvaluo: String,
+    fechaAvaluo: {type: Date, default:Date.now()},
     metodoPago:{ type: String},
 
     tipoAvaluo: String, //Casa, Departamento, Bodega

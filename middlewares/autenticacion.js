@@ -9,10 +9,10 @@ var ApiKey = require('../models/administracion/api-key');
 // comparando el token (llave o cadena de texto)
 // con la cadena de texto en la base de datos
 exports.verificaToken = function(req, res, next) {
-    //const token = req.get('authorization')?.split(' ')[1] || req.get('token') || '';
+    const token = req.get('authorization')?.split(' ')[1] || req.get('token') || '';
 
     //se utiliza body o get porque puede ser post o ser put la peticion
-    const token = req.body.token || req.get('token')||'';
+   //const token = req.body.token || req.get('token')||'';
     jwt.verify(token, SEED, (err, decoded) => {
         if (err) {
             return res.status(401).json({
@@ -21,6 +21,7 @@ exports.verificaToken = function(req, res, next) {
                 errors: err
             });
         }
+        console.log(decoded);
         req.usuario = decoded.usuario;//? porque hacer esto
         req.partner = decoded.partner;
         next();

@@ -3,6 +3,7 @@
 
 var Tarea = require('./tarea.model');
 const {response} = require("express");
+const mongoose = require("mongoose");
 
 
 function crear(req, res){
@@ -51,8 +52,8 @@ function catalogoEstados(req, res){
 }
 /**
  * Consulta las tareas por paginas, por default pageSize=10, page=1
- * @param req
- * @param res
+ * @param req Request de la peticion
+ * @param res Respuesta de la peticion
  */
 function consultaPaginado(req, res){
     let id =  req.params.id;
@@ -68,22 +69,34 @@ function consultaPaginado(req, res){
     let findTerms = {};
     //findTerms['user']=req.user._id;
     //findTerms['owner']=req.user._id;
+    var body = req.body;
+    findTerms ['$and'] = [ ];
 
-
+    if(req.usuario?.role==='ROOT_USER' || req.usuario?.role==='ADMIN_USER'){
+        if(body.usuario )
+            findTerms ['$and'].push({'usuario':  body.usuario });
+    }else{ //eres un usuario normal
+        if( req.usuario?._id)
+            findTerms ['$and'].push({'usuario':  mongoose.Types.ObjectId(req.usuario?._id) });
+    }
 
     if(req.body){
-        findTerms ['$and'] = [ ];
-        var body = req.body;
+
+
         console.log(body);
         if(body.nombreCliente)
             findTerms ['$and'].push({'nombreCliente': new RegExp(body.nombreCliente, 'i')});
         if(body.estatus)
             findTerms ['$and'].push({'estatus': body.estatus});
-    }
+        if(body.fechaAvaluo)
+            findTerms ['$and'].push({'fechaAvaluo': body.fechaAvaluo});
+            }
     if(findTerms['$and'].length===0){
       delete  findTerms['$and'] ;
     }
         // = {...req.body}
+    console.log(req.user);
+
     console.log(findTerms);
 
     Tarea.find(findTerms)
@@ -96,6 +109,7 @@ function consultaPaginado(req, res){
                 id: id,
                 error: "no existe"
             });
+            return;
         }
             Tarea.countDocuments(findTerms, (err, conteo) => {
                 var paginas = Math.trunc(conteo/numeroPorPagina);
@@ -106,7 +120,8 @@ function consultaPaginado(req, res){
                 res.status(200).json({
                     ok: true,
                     busqueda: body,
-                    paginacion: {pagina:pageNumber, size: data.length, pageSize: numeroPorPagina, total: conteo, pages: paginas },
+                    terms: findTerms,
+                    paginacion: {pagina:pageNumber, size: data?.length, pageSize: numeroPorPagina, total: conteo, pages: paginas },
                     tareas: data,
 
                 });

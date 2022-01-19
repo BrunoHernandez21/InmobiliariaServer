@@ -68,8 +68,18 @@ function login(req, res) {
             delete user['password'];
 
             // y lo mete dentro de otro mapa payload con la llave usuario
+            let usuario = {
+                email: usuarioDB.email,
+                name: usuarioDB.name,
+                surname: usuarioDB.surname,
+                _id: usuarioDB._id,
+                role: usuarioDB.role,
+                roles: usuarioDB.roles,
+                img: usuarioDB.img
+            };
+
             let payload = {
-                keys: user,
+                usuario
             };
             //comprueba si la contraseña es correcta
             if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
