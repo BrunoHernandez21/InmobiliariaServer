@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
-const { map } = require('./tarea.routes');
-var Schema = mongoose.Schema;
-
+const Foto  = require('./subtipes/foto.model');
+const Checklist  = require('./subtipes/cheklist.model');
+var Schema = mongoose.Schema; 
 
 var estatusTarea = {
     values: ['ACTIVA', 'BORRADA', 'OCULTA'],
@@ -19,11 +19,10 @@ var TareaSchema = new Schema({
     fecha : {  type: Date, default: Date.now },
     estatus:  { type: String, enum: estatusTarea, default: 'ACTIVA' },
     tipo: String,
-
-    objetos:[String],
-    fotos:[String],
-    fotosAdicionales: [String],
-    notas: [String],
+    
+    fotos:[{Foto}],
+    fotosAdicionales: [{Foto}],
+    notas: [{type:String}],
     firma:{ type: String},
 
     direccion: String,
@@ -38,7 +37,7 @@ var TareaSchema = new Schema({
     
     costo: Number,
     total:{ type: String},
-    checklist: [{type: String}],
+    checklist: [{Checklist}],
     owner : {  type: Schema.Types.ObjectId, ref: 'Usuario', required: false },
     usuario : {  type: Schema.Types.ObjectId, ref: 'Usuario', required: false },
 });

@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-const { map } = require('./tarea.routes');
+const { map } = require('../tarea.routes');
 var Schema = mongoose.Schema;
 
 var estatus = {
