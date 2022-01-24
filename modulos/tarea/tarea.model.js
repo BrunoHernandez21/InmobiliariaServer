@@ -20,8 +20,8 @@ var TareaSchema = new Schema({
     estatus:  { type: String, enum: estatusTarea, default: 'ACTIVA' },
     tipo: String,
     
-    fotos:[{Foto}],
-    fotosAdicionales: [{Foto}],
+    fotos:[Foto],
+    fotosAdicionales: [Foto],
     notas: [{type:String}],
     firma:{ type: String},
 
@@ -37,7 +37,7 @@ var TareaSchema = new Schema({
     
     costo: Number,
     total:{ type: String},
-    checklist: [{Checklist}],
+    checklist: [Checklist],
     owner : {  type: Schema.Types.ObjectId, ref: 'Usuario', required: false },
     usuario : {  type: Schema.Types.ObjectId, ref: 'Usuario', required: false },
 });

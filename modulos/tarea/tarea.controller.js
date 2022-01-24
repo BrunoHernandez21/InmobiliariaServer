@@ -4,8 +4,10 @@ const mongoose = require("mongoose");
 
 
 function crear(req, res){
-    var body = req.body;
-
+    var body = new Map(); 
+    body.set({...req.body});
+    body.delete("_id");
+    
     var tarea = new Tarea({...body});
     tarea.save((err, tareaGuardada) => {
         if (err) {
@@ -15,11 +17,30 @@ function crear(req, res){
                 errors: err
             });
         }
+        console.log(tareaGuardada);
         res.status(201).json({
             status: true,
             tarea: tareaGuardada
         });
     });
+}
+
+function deleteTarea(req, res){
+    let id =  req.params.id;
+
+    Tarea.deleteOne({'_id':  mongoose.Types.ObjectId(id) }).exec((err, data)=>{
+        if(err){
+            res.status(400).json({
+                status: false,
+                id: id,
+                error: "no existe"
+            });
+        }
+        res.status(201).json({
+            status: true,
+            data: data,
+        });
+    })
 }
 
 
@@ -64,10 +85,11 @@ function consultaPaginado(req, res){
     desde = Number(desde);
 
     let findTerms = {};
+    findTerms ['$and'] = [ ];
     //findTerms['user']=req.user._id;
     //findTerms['owner']=req.user._id;
     var body = req.body;
-    findTerms ['$and'] = [ ];
+  
 
     if(req.usuario?.role==='ROOT_USER' || req.usuario?.role==='ADMIN_USER'){
         if(body.usuario )
@@ -76,9 +98,7 @@ function consultaPaginado(req, res){
         if( req.usuario?._id)
             findTerms ['$and'].push({'usuario':  mongoose.Types.ObjectId(req.usuario?._id) });
     }
-
     if(req.body){
-
 
         console.log(body);
         if(body.nombreCliente)
@@ -87,7 +107,7 @@ function consultaPaginado(req, res){
             findTerms ['$and'].push({'estatus': body.estatus});
         if(body.fechaAvaluo)
             findTerms ['$and'].push({'fechaAvaluo': body.fechaAvaluo});
-            }
+    }
     if(findTerms['$and'].length===0){
       delete  findTerms['$and'] ;
     }
@@ -190,5 +210,6 @@ module.exports={
     consultaPaginado,
     catalogoEstados,
     consultaActivos,
-    actualizarTarea
+    actualizarTarea,
+    deleteTarea
 };
