@@ -1,8 +1,5 @@
 'use strict'
-
-
 var Tarea = require('./tarea.model');
-const {response} = require("express");
 const mongoose = require("mongoose");
 
 
@@ -131,11 +128,44 @@ function consultaPaginado(req, res){
     })
 }
 
+/**
+ * Consulta las tareas por paginas, por default pageSize=10, page=1, {nombreCliente, fechaAvaluo, estatus}
+ * @param req Request de la peticion
+ * @param res Respuesta de la peticion
+ */
+ function consultaActivos(req, res){
+    let id =  req.params.id;
+    let findTerms = {};
+
+    findTerms ['$and'] = [ ];
+    if( req.usuario?._id)
+            findTerms ['$and'].push({'usuario':  mongoose.Types.ObjectId(req.usuario?._id) });
+    findTerms ['$and'].push({'estatus':"ACTIVA"});
+
+    Tarea.find(findTerms).exec((err, data)=>{
+        if(err){
+            res.status(400).json({
+                status: false,
+                id: id,
+                error: "no existe"
+            });
+            return;
+        }
+        Tarea.countDocuments(findTerms, (err, conteo) => {
+            res.status(200).json({
+                ok: true,
+                terms: findTerms,
+                tareas: data,
+            });
+        })
+    })
+}
+
 function actualizarTarea(req, res){
     var id = req.params.id;
     var body = req.body;
 
-    Tarea.findByIdAndUpdate(id, body, {new:true}, (err, partner) => {
+    Tarea.findByIdAndUpdate(id, body, (err) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -143,18 +173,12 @@ function actualizarTarea(req, res){
                 errors: err
             });
         }
-        if (!partner) {
-            res.status(400).json({
-                ok: false,
-                mensaje: 'El partner con id ' + id + ' no existe',
-                errors: { message: 'No existe un partner con ese ID' }
-            });
-        }else{
-            res.status(200).json({
+        res.status(200).json({
                 ok: true,
-                partner: partner
-            });
-        }
+                body:body
+
+        });
+        
     });
 
 
@@ -165,5 +189,6 @@ module.exports={
     consulta,
     consultaPaginado,
     catalogoEstados,
+    consultaActivos,
     actualizarTarea
 };
