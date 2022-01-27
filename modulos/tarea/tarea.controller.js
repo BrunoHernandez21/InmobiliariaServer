@@ -4,11 +4,7 @@ const mongoose = require("mongoose");
 
 
 function crear(req, res){
-    var body = new Map(); 
-    body.set({...req.body});
-    body.delete("_id");
-    
-    var tarea = new Tarea({...body});
+    var tarea = new Tarea({...req.body});
     tarea.save((err, tareaGuardada) => {
         if (err) {
             return res.status(400).json({
@@ -105,6 +101,8 @@ function consultaPaginado(req, res){
             findTerms ['$and'].push({'nombreCliente': new RegExp(body.nombreCliente, 'i')});
         if(body.estatus)
             findTerms ['$and'].push({'estatus': body.estatus});
+        if(body.estadoTarea)
+            findTerms ['$and'].push({'estadoTarea': body.estadoTarea});
         if(body.fechaAvaluo)
             findTerms ['$and'].push({'fechaAvaluo': body.fechaAvaluo});
     }

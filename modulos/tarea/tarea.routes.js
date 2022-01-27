@@ -20,7 +20,7 @@ app.get('/list/:page/:pageSize',[mdAutenticacion.verificaToken], TareaController
 //listado de tareas
 app.get('/list/:page',[mdAutenticacion.verificaToken], TareaController.consultaPaginado);           //✓
 
-//app.post('/list/:page/:pageSize',[mdAutenticacion.verificaToken], TareaController.consultaPaginado);        //✓
+app.post('/list/:page/:pageSize',[mdAutenticacion.verificaToken], TareaController.consultaPaginado);        //✓
 app.get('/ctg/estados', TareaController.catalogoEstados);                   //✓
 
 //app.get('/list-user/:page/:pageSize',[mdAutenticacion.verificaToken], TareaController.consultaPaginado);         //✓

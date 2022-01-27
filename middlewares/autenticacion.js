@@ -9,8 +9,6 @@ var ApiKey = require('../models/administracion/api-key');
 // comparando el token (llave o cadena de texto)
 // con la cadena de texto en la base de datos
 exports.verificaToken = function(req, res, next) {
-    console.log("aqui va a estar mi peticion");
-    console.log(req.get('authorization'));
     const token = req.get('authorization')?.split(' ')[1] || req.get('token') || '';
 
     //se utiliza body o get porque puede ser post o ser put la peticion
