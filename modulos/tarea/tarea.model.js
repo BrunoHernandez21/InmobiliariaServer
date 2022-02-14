@@ -8,18 +8,20 @@ var estatusTarea = {
     message: '{VALUE} no es un estatus valido'
 };
 var estadoTarea = {
-    values: ['BORRADOR', 'SIN_ASIGNAR', 'ASIGNADO', 'TERMINADA', 'PROCESO', 'APROBANDO','CANCELADA'],
+    values: [,'CANCELADA','BORRADOR', 'SIN_ASIGNAR', 'PROCESO','TERMINADA',  'APROBANDO'],
     message: '{VALUE} no es un estatus valido'
 };
 
 
 var TareaSchema = new Schema({
-    nombreCliente: String,
+    nombreCliente: {type:String},
     estado:  { type: String, enum: estadoTarea, default: 'BORRADOR' },
     fecha : {  type: Date, default: Date.now },
     estatus:  { type: String, enum: estatusTarea, default: 'ACTIVA' },
-    tipo: String,
-    
+    tipo: {type:String},
+    cel: {type:Number},
+    tel:{type:Number},
+
     fotos:[Foto],
     fotosAdicionales: [Foto],
     notas: [{type:String}],

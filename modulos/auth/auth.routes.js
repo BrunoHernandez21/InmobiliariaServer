@@ -16,10 +16,9 @@ app.post('/sign-up',[
     body('password','Password is necesari').exists(),
     body('email','is not a form of email').isEmail()
 ],AuthController.crearUsuario);
-app.post('/renuevatoken',       [
-    body('accessToken','ingrese el token').exists(),
-    mdAutenticacion.verificaToken],    AuthController.renuevaToken);
+app.post('/renuevatoken',       [mdAutenticacion.verificaToken],    AuthController.renuevaToken);
 app.put('/update-password/:id', [mdAutenticacion.verificaToken],    AuthController.cambiarPassword);
+app.put('/usuario/:id',          [mdAutenticacion.verificaToken],    AuthController.updateInfo);
 app.post('/reset-password',                                         AuthController.resetPassword);
 
 

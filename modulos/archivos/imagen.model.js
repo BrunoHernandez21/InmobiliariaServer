@@ -8,7 +8,6 @@ var ImageSchema = new Schema({
     url: String,
     type: String,
     producto: { type: Schema.Types.ObjectId, ref: 'Producto', required: false},
-
 });
 
 

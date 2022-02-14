@@ -21,7 +21,7 @@ exports.verificaToken = function(req, res, next) {
                 errors: err
             });
         }
-        console.log(decoded);
+        
         req.usuario = decoded.usuario;//? porque hacer esto
         req.partner = decoded.partner;
         next();

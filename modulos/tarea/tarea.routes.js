@@ -15,12 +15,11 @@ app.delete('/:id',[mdAutenticacion.verificaToken], TareaController.deleteTarea);
 app.get('/list/activos', [mdAutenticacion.verificaToken], TareaController.consultaActivos);         //✓
 app.get('/:id',TareaController.consulta);                                                           //✓
 app.get('/list/:page/:pageSize',[mdAutenticacion.verificaToken], TareaController.consultaPaginado); //✓
-
-
+app.post('/list/:page/:pageSize',[mdAutenticacion.verificaToken], TareaController.consultaPaginado);//✓
 //listado de tareas
 app.get('/list/:page',[mdAutenticacion.verificaToken], TareaController.consultaPaginado);           //✓
 
-app.post('/list/:page/:pageSize',[mdAutenticacion.verificaToken], TareaController.consultaPaginado);        //✓
+
 app.get('/ctg/estados', TareaController.catalogoEstados);                   //✓
 
 //app.get('/list-user/:page/:pageSize',[mdAutenticacion.verificaToken], TareaController.consultaPaginado);         //✓

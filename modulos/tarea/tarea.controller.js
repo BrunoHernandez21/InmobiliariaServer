@@ -13,7 +13,6 @@ function crear(req, res){
                 errors: err
             });
         }
-        console.log(tareaGuardada);
         res.status(201).json({
             status: true,
             tarea: tareaGuardada
@@ -85,6 +84,7 @@ function consultaPaginado(req, res){
     //findTerms['user']=req.user._id;
     //findTerms['owner']=req.user._id;
     var body = req.body;
+   
   
 
     if(req.usuario?.role==='ROOT_USER' || req.usuario?.role==='ADMIN_USER'){
@@ -96,13 +96,13 @@ function consultaPaginado(req, res){
     }
     if(req.body){
 
-        console.log(body);
+
         if(body.nombreCliente)
             findTerms ['$and'].push({'nombreCliente': new RegExp(body.nombreCliente, 'i')});
+        if(body.estado)
+            findTerms ['$and'].push({'estado': {$in :["BORRADOR"]}});
         if(body.estatus)
-            findTerms ['$and'].push({'estatus': body.estatus});
-        if(body.estadoTarea)
-            findTerms ['$and'].push({'estadoTarea': body.estadoTarea});
+            findTerms ['$and'].push({'estatus': {$in :body.estatus}});
         if(body.fechaAvaluo)
             findTerms ['$and'].push({'fechaAvaluo': body.fechaAvaluo});
     }
@@ -110,9 +110,6 @@ function consultaPaginado(req, res){
       delete  findTerms['$and'] ;
     }
         // = {...req.body}
-    console.log(req.user);
-
-    console.log(findTerms);
 
     Tarea.find(findTerms)
         .skip(desde)
@@ -159,6 +156,7 @@ function consultaPaginado(req, res){
     if( req.usuario?._id)
             findTerms ['$and'].push({'usuario':  mongoose.Types.ObjectId(req.usuario?._id) });
     findTerms ['$and'].push({'estatus':"ACTIVA"});
+    findTerms ['$and'].push({'estado': {$in :["PROCESO","SIN_ASIGNAR"]}});
 
     Tarea.find(findTerms).exec((err, data)=>{
         if(err){

@@ -25,6 +25,19 @@ function getImage(req, res) {
     });
 };
 
+function deleteImage(req, res) {
+
+    var tipo = req.params.tipo;
+    var filename = req.params.filename;
+
+    console.log(path);
+    //var path = `./uploads/${ tipo }/${ img }`;
+    var path = `./uploads/${tipo}/${filename}`;
+    fs.delete(path)
+
+
+}
+
 function subirArchivo(req, res) {
 
     var tipo = req.params.tipo;
@@ -100,7 +113,7 @@ function subirArchivo(req, res) {
             });
 
 
-        })
+        });
 
     });
 
@@ -110,5 +123,6 @@ function subirArchivo(req, res) {
 
 module.exports = {
     getImage,
+    deleteImage,
     subirArchivo
 }

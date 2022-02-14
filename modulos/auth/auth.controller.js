@@ -37,7 +37,7 @@ function login(req, res) {
     // si lo encuentras selecciona {caracteristicas} 
     // y ejecuta
     Credential.findOne(credentialUser).exec(async (err, usuarioDB) => {
-        console.log(usuarioDB);
+        
 
             if (err) {
                 return res.status(500).json({
@@ -99,6 +99,29 @@ function login(req, res) {
             });
         });
 };
+
+function updateInfo(req,res){
+    var id = req.params.id;
+    
+    var body = req.body;
+    console.log(body);
+    Credential.findByIdAndUpdate(id, body, (err) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar id',
+                errors: err
+            });
+        }
+        res.status(200).json({
+                ok: true,
+                body:body
+
+        });
+        
+    });
+
+}
 //inicio de seccion por ID token
 function renuevaToken(req, res) {
     //verifica si tiene el token
@@ -114,7 +137,7 @@ function renuevaToken(req, res) {
 
     const token = req.body.accessToken;
     jwt.verify(token, SEED, (err, decoded) => {
-        console.log(decoded);
+        
         if (err) {
             return res.status(401).json({
                 ok: false,
@@ -153,7 +176,7 @@ function crearUsuario(req, res) {
     usuario.password = bcrypt.hashSync(body.password, 10);
     usuario.save(async (err, usuarioGuardado) => {
         if (err) {
-            console.log('err :>> ', err);
+            
             return res.status(400).json({
                 ok: false,
                 mensaje: 'Error al crear usuario',
@@ -207,7 +230,7 @@ function cambiarPassword(req, res) {
                 role: usuarioGuardado.role
             };
             var tokenUser = jwt.sign({usuario: userx}, SEED, {expiresIn: 14400});
-            console.log(tokenUser);
+            
             res.status(200).json({
                 ok: true,
                 usuario: userx,
@@ -230,7 +253,7 @@ function verifyUser(req, res) {
 
 
     jwt.verify(token, SEED, (err, decoded) => {
-        console.log(decoded);
+        
         if (err) {
             return res.status(401).json({
                 ok: false,
@@ -283,7 +306,7 @@ async function verificaPartner(host, id) {
 
 function signByContrato(req, res) {
     var body = req.body;
-    console.log(body);
+    
     Contrato.findOne({numeroContrato: body.numeroContrato})
         //.populate({
         //path: 'empresa',
@@ -350,7 +373,7 @@ function resetPassword(req, res) {
 
             if (userBBD) {
                 let newPwd = Math.random().toString(36).substr(2, 8);
-                console.log(newPwd);
+                
                 let pwdEncrypted = bcrypt.hashSync(newPwd, 10);
 
 
@@ -393,5 +416,6 @@ module.exports = {
     renuevaToken,
     signByContrato,
     resetPassword,
-    cambiarPassword
+    cambiarPassword,
+    updateInfo
 };

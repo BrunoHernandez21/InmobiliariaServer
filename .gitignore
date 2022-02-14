@@ -17,6 +17,10 @@ output
 /uploads/estadios/*.jpg
 /uploads/images/*.png
 /uploads/images/*.jpg
+/uploads/avatar/*.png
+/uploads/avatar/*.jpg
+/uploads/usuarios/*.jpg
+/uploads/usuarios/*.png
 /uploads/tarjeta-logo/*.png
 /uploads/tarjeta-logo/*.jpg
 /uploads/tarjeta-avatar/*.png
