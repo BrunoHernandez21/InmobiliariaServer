@@ -39,7 +39,8 @@ var TareaSchema = new Schema({
     
     costo: Number,
     total:{ type: String},
-    checklist: [Checklist],
+    objetos: [{type:String}],
+    sugerencias: [{type:String}],
     owner : {  type: Schema.Types.ObjectId, ref: 'Usuario', required: false },
     usuario : {  type: Schema.Types.ObjectId, ref: 'Usuario', required: false },
 });

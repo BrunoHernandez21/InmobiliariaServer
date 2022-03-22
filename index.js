@@ -3,7 +3,7 @@
 
 var mongoose = require('mongoose');
 var app = require('./app');
-var port = 25565;//process.env.PORT || 3000;
+var port = process.env.PORT || 25565;
 
 mongoose.Promise = global.Promise;
 
