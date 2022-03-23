@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 const Foto  = require('./subtipes/foto.model');
-const Checklist  = require('./subtipes/cheklist.model');
 var Schema = mongoose.Schema; 
 
 var estatusTarea = {
