@@ -23,10 +23,14 @@ app.use(bodyParser.json())
 //          Declaracion
 var auth = require ('./modulos/auth/auth.routes');                              //✓ Solo para logiar
 var tareasRoutes = require ('./modulos/tarea/tarea.routes');                    //✓ Las tareas
+var catalogosRoutes = require ('./modulos/tarea/catalogos/catalogos.routes');                    //✓ Las tareas
+
 var uploadRoutes = require ('./modulos/archivos/upload.routes');
 //          implementacion
 app.use('/api/auth', auth);
 app.use('/api/tarea', tareasRoutes);
+app.use('/api/tareas', catalogosRoutes);
+
 app.use('/api/archives', uploadRoutes);
 
 module.exports = app;

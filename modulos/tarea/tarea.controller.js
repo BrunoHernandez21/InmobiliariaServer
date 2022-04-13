@@ -1,5 +1,8 @@
 'use strict'
 var Tarea = require('./tarea.model');
+
+var Configuration = require('./catalogos/configuration.model');
+
 const mongoose = require("mongoose");
 
 
@@ -57,6 +60,21 @@ function consulta(req, res){
         });
     })
 }
+
+function catalogoTipos(req, res){
+        Configuration.findOne({name:'types'}).exec((err, data)=> {
+        if (err) {
+            res.status(400).json({
+                status: false,
+                error: err
+            });
+            return;
+        }
+        res.status(201).json({types: data.options} );
+    });
+}
+
+
 
 function catalogoEstados(req, res){
     res.status(201).json(
@@ -207,5 +225,6 @@ module.exports={
     catalogoEstados,
     consultaActivos,
     actualizarTarea,
-    deleteTarea
+    deleteTarea,
+    catalogoTipos
 };

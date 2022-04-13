@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-const Foto  = require('./subtipes/foto.model');
+const Foto  = require('./catalogos/foto.model');
 var Schema = mongoose.Schema; 
 
 var estatusTarea = {
@@ -7,7 +7,7 @@ var estatusTarea = {
     message: '{VALUE} no es un estatus valido'
 };
 var estadoTarea = {
-    values: [,'CANCELADA','BORRADOR', 'SIN_ASIGNAR', 'PROCESO','TERMINADA',  'APROBANDO'],
+    values: [,'CANCELADA','BORRADOR', 'SIN_ASIGNAR', 'PROCESO','TERMINADA', 'APROBANDO'],
     message: '{VALUE} no es un estatus valido'
 };
 

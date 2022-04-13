@@ -3,7 +3,7 @@ const { map } = require('../tarea.routes');
 var Schema = mongoose.Schema;
 
 var estatus = {
-    values: ['ACTIVA', 'INACTIVA'],
+    values: ['ACTIVO', 'INACTIVO'],
     message: '{VALUE} no es un estatus valido'
 };
 
@@ -11,11 +11,12 @@ var estatus = {
  * Casa, Terreno, Bodega, Edificio
  * @type {module:mongoose.Schema<Document, Model<Document, any, any>, undefined, {}>}
  */
-var TipoAvaluoSchema = new Schema({
+var SubTipoAvaluoSchema = new Schema({
     nombre: String,
-    estatus:  { type: String, enum: estatus, default: 'ACTIVA' }
+    tipo : {  type: Schema.Types.ObjectId, ref: 'TipoAvaluo', required: true },
+    estatus:  { type: String, enum: estatus, default: 'ACTIVO' }
 });
 
 
-module.exports = mongoose.model('TipoAvaluo', TipoAvaluoSchema);
+module.exports = mongoose.model('SubTipoAvaluo', SubTipoAvaluoSchema);
 
