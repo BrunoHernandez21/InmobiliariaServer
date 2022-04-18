@@ -43,7 +43,7 @@ function deleteInstance(req, res){
 function consulta(req, res){
     let id =  req.params.id;
     let nombre =  req.params.nombre;
-    let filter = [];
+    let filter = {};
     if(id)
         filter['_id'] = mongoose.Types.ObjectId(id) ;
     if(nombre)
@@ -52,11 +52,12 @@ function consulta(req, res){
     console.log(filter);
 //{$or:[{_id: id}, {nombre: id}]}
     Tipo.findOne(filter).exec((err, data)=>{
+	    console.log(err);
         if(err){
             res.status(400).json({
                 status: false,
                 id: id,
-                error: "no existe"
+                error: err 
             });
             return;
         }
@@ -82,7 +83,7 @@ function consulta(req, res){
     findTerms ['$and'] = [ ];
     findTerms ['$and'].push({'estatus':"ACTIVO"});
 
-    Tipo.find(findTerms,"nombre").exec((err, data)=>{
+    Tipo.find(findTerms,"nombre opciones").exec((err, data)=>{
         if(err){
             res.status(400).json({
                 status: false,
