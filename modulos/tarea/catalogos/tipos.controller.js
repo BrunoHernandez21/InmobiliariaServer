@@ -1,5 +1,6 @@
 'use strict'
 var Tipo = require('./tipoAvaluo.model');
+var Objetos = require('./objetos.model');
 
 const mongoose = require("mongoose");
 
@@ -44,13 +45,13 @@ function consulta(req, res){
     let id =  req.params.id;
     let nombre =  req.params.nombre;
     let filter = {};
-    if(id)
+  /*  if(id)
         filter['_id'] = mongoose.Types.ObjectId(id) ;
     if(nombre)
         filter['nombre'] = nombre;
+*/
 
-
-    Tipo.findOne(filter).exec((err, data)=>{
+    Objetos.distinct("nombre").exec((err, data)=>{
         if(err){
             res.status(400).json({
                 status: false,
@@ -59,9 +60,10 @@ function consulta(req, res){
             });
             return;
         }
+
         res.status(201).json({
             status: true,
-            tipo: data
+            tipo: {nombre:"todos", opciones: data}
         });
     })
 }
