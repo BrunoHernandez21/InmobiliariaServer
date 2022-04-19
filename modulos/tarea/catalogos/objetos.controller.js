@@ -1,11 +1,11 @@
 'use strict'
-var Tipo = require('./tipoAvaluo.model');
+var Objeto = require('./objetos.model');
 
 const mongoose = require("mongoose");
 
 
 function crear(req, res){
-    var tipo = new Tipo({...req.body});
+    var tipo = new Objeto({...req.body});
     tipo.save((err, tipoGuardado) => {
         if (err) {
             return res.status(400).json({
@@ -24,7 +24,7 @@ function crear(req, res){
 function deleteInstance(req, res){
     let id =  req.params.id;
 
-    Tipo.deleteOne({'_id':  mongoose.Types.ObjectId(id) }).exec((err, data)=>{
+    Objeto.deleteOne({'_id':  mongoose.Types.ObjectId(id) }).exec((err, data)=>{
         if(err){
             res.status(400).json({
                 status: false,
@@ -50,7 +50,7 @@ function consulta(req, res){
         filter['nombre'] = nombre;
 
 
-    Tipo.findOne(filter).exec((err, data)=>{
+    Objeto.findOne(filter).exec((err, data)=>{
         if(err){
             res.status(400).json({
                 status: false,
@@ -80,7 +80,7 @@ function consulta(req, res){
     findTerms ['$and'] = [ ];
     findTerms ['$and'].push({'estatus':"ACTIVO"});
 
-    Tipo.find(findTerms,"nombre opciones").exec((err, data)=>{
+    Objeto.find(findTerms,"clave nombre -_id").exec((err, data)=>{
         if(err){
             res.status(400).json({
                 status: false,
@@ -89,11 +89,11 @@ function consulta(req, res){
             });
             return;
         }
-        Tipo.countDocuments(findTerms, (err, conteo) => {
+        Objeto.countDocuments(findTerms, (err, conteo) => {
             res.status(200).json({
                 ok: true,
                 terms: findTerms,
-                tipos: data,
+                opciones: data,
             });
         })
     })
@@ -103,7 +103,7 @@ function actualizar(req, res){
     var id = req.params.id;
     var body = req.body;
 
-    Tipo.findByIdAndUpdate(id, body, (err) => {
+    Objeto.findByIdAndUpdate(id, body, (err) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
