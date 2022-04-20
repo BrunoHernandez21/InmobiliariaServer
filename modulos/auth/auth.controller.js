@@ -41,7 +41,9 @@ function login(req, res) {
     // En el objeto mongose utiliza la funcion buscar a un {email:email} 
     // si lo encuentras selecciona {caracteristicas} 
     // y ejecuta
-    Authentication.findOne(authenticationUser).exec(async (err, usuarioDB) => {
+    Authentication.findOne(authenticationUser)
+        .populate('user')
+        .exec(async (err, auth) => {
         
 
             if (err) {
@@ -52,7 +54,7 @@ function login(req, res) {
                 });
             }
             //No encontro el correo
-            if (!usuarioDB) {
+            if (!auth) {
                 return res.status(400).json({
                     ok: false,
                     mensaje: 'Email no registrado',
@@ -60,7 +62,7 @@ function login(req, res) {
                 });
             }
             //checa el estatus del usuario
-            if (usuarioDB.estatus !== true) {
+            if (auth.estatus !== true) {
                 return res.status(400).json({
                     ok: false,
                     mensaje: 'Usuario Inactivo, contacta a tu Administrador para que active tu cuenta',
@@ -72,22 +74,22 @@ function login(req, res) {
 
             // y lo mete dentro de otro mapa payload con la llave usuario
             let usuario = {
-                email: usuarioDB.email,
-                name: usuarioDB.name,
-                surname: usuarioDB.surname,
-                middlename: usuarioDB.middlename,
-                lastname: usuarioDB.lastname,
-                _id: usuarioDB._id,
-                role: usuarioDB.role,
-                roles: usuarioDB.roles,
-                img: usuarioDB.img
+                email: auth.email,
+                name: auth.user?.name,
+                surname: auth.user?.surname,
+                middlename: auth.user?.middlename,
+                lastname: auth.user?.lastname,
+                _id: auth.user._id,
+                role: auth.role,
+                roles: auth.roles,
+                img: auth.user.img
             };
 
             let payload = {
                 usuario
             };
             //comprueba si la contraseña es correcta
-            if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
+            if (!bcrypt.compareSync(body.password, auth.password)) {
                 return res.status(400).json({
                     ok: false,
                     mensaje: 'Credenciales incorrectas',
@@ -141,31 +143,31 @@ function crearUsuario(req, res) {
 
     /////////////
     var body = req.body;
-    var authentication = new Authentication({...body});
 
-    authentication.password = bcrypt.hashSync(body.password, 10);
-    authentication.save( (err, authenticationStored) => {
-        if (err) {
-            
+    var usuario = new Usuario({...body});
+    usuario.name = body.name || '';
+    usuario.middlename = body.middlename || '';
+    usuario.surname = usuario.surname || usuario.name;
+    console.log(usuario);
+    usuario.save((errUs, userStored) => {
+        var token = jwt.sign({usuario: userStored}, SEED, {expiresIn: 14400}); // 4 horas
+        if(errUs){
             return res.status(400).json({
                 ok: false,
                 mensaje: 'Error al crear usuario',
-                errors: err
+                errors: errUs
             });
         }
-        var usuario = new Usuario({...body});
-        usuario.name = body.name || '';
-        usuario.middlename = body.middlename || '';
-        usuario.surname = usuario.surname || usuario.name;
-        usuario._id = authentication._id;
-        console.log(usuario);
-        usuario.save((errUs, userStored) => {
-            var token = jwt.sign({usuario: userStored}, SEED, {expiresIn: 14400}); // 4 horas
-            if(errUs){
+        var authentication = new Authentication({...body});
+        authentication.user = userStored._id;
+        authentication.password = bcrypt.hashSync(body.password, 10);
+        authentication.save( (err, authenticationStored) => {
+            if (err) {
+
                 return res.status(400).json({
                     ok: false,
                     mensaje: 'Error al crear usuario',
-                    errors: errUs
+                    errors: err
                 });
             }
             res.status(201).json({
@@ -174,8 +176,9 @@ function crearUsuario(req, res) {
                 token: token
             });
         });
-
     });
+
+
 }
 
 
