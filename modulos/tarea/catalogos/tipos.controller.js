@@ -63,7 +63,7 @@ function consulta(req, res){
 
         res.status(201).json({
             status: true,
-            tipo: {nombre:"todos", opciones: data}
+            tipo: {nombre:"todos", opciones: data.sort()}
         });
     })
 }

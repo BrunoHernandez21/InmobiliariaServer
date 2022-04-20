@@ -7,7 +7,7 @@ var CotizacionMaquinaria = require('../../models/renton/cotizacion_maquinaria');
 var CONFIG_MAIL = require('../../config/config').configMail;
 const fs = require('fs');
 const nodemailer = require('nodemailer');
-var Usuario = require('../../modulos/auth/credential.model');
+var Usuario = require('../../modulos/auth/authentication.model');
 
 
 

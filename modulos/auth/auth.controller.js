@@ -3,7 +3,8 @@ const { validationResult } = require('express-validator');
 var jwt = require('jsonwebtoken');
 var Partner = require('../../models/administracion/partner');
 var SEED = require('../../config/config').SEED;
-var Credential = require('./credential.model');
+var Authentication = require('./authentication.model');
+var Usuario = require('../admin/usuarios/usuario.model');
 
 
 const SESSION_EXPIRES_AT = require('../../config/config').SESSION_EXPIRES_AT;
@@ -22,7 +23,7 @@ const payloadJwt = {
 function login(req, res) {
     //verifica si tiene la forma necesaria para el login
     const errors = validationResult(req);
-    console.log(errors);
+
     if (!errors.isEmpty()){
         console.log(errors);
         return res.status(400).json({
@@ -32,11 +33,15 @@ function login(req, res) {
     }
     //comprobacion personal del login
     var body = req.body;
-    let credentialUser = {email: body.email};
+    let messagingToken = req.messagingToken;
+    console.log('***');
+    console.log(messagingToken);
+
+    let authenticationUser = {email: body.email};
     // En el objeto mongose utiliza la funcion buscar a un {email:email} 
     // si lo encuentras selecciona {caracteristicas} 
     // y ejecuta
-    Credential.findOne(credentialUser).exec(async (err, usuarioDB) => {
+    Authentication.findOne(authenticationUser).exec(async (err, usuarioDB) => {
         
 
             if (err) {
@@ -64,14 +69,14 @@ function login(req, res) {
             }
             // instancia la informacion obtenida en un mapa user
 
-            let user = JSON.parse(JSON.stringify(usuarioDB));
-            delete user['password'];
 
             // y lo mete dentro de otro mapa payload con la llave usuario
             let usuario = {
                 email: usuarioDB.email,
                 name: usuarioDB.name,
                 surname: usuarioDB.surname,
+                middlename: usuarioDB.middlename,
+                lastname: usuarioDB.lastname,
                 _id: usuarioDB._id,
                 role: usuarioDB.role,
                 roles: usuarioDB.roles,
@@ -94,7 +99,7 @@ function login(req, res) {
             //ok
             res.status(200).json({
                 ok: true,
-                user: user,
+                user: usuario,
                 token: token
             });
         });
@@ -102,10 +107,9 @@ function login(req, res) {
 
 function updateInfo(req,res){
     var id = req.params.id;
-    
     var body = req.body;
-    console.log(body);
-    Credential.findByIdAndUpdate(id, body, (err) => {
+    //console.log(body);
+    Authentication.findByIdAndUpdate(id, body, (err) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -116,45 +120,10 @@ function updateInfo(req,res){
         res.status(200).json({
                 ok: true,
                 body:body
-
         });
-        
     });
-
 }
-//inicio de seccion por ID token
-function renuevaToken(req, res) {
-    //verifica si tiene el token
-    const errors = validationResult(req);
-    console.log(errors);
-    if (!errors.isEmpty()){
-        console.log(errors);
-        return res.status(400).json({
-            ok:false,
-            errors: errors.mapped()
-        })
-    }
 
-    const token = req.body.accessToken;
-    jwt.verify(token, SEED, (err, decoded) => {
-        
-        if (err) {
-            return res.status(401).json({
-                ok: false,
-                mensaje: 'Token incorrecto',
-                errors: err
-            });
-        }
-        var tokenNew = jwt.sign({usuario: decoded.usuario}, SEED, payloadJwt);
-        res.status(200).json({
-            authenticated: true,
-            token: tokenNew
-            //usuario: decoded.usuario,
-            //partner: decoded.partner
-        });
-    });
-
-};
 
 // Crear un nuevo usuario
 function crearUsuario(req, res) {
@@ -172,9 +141,10 @@ function crearUsuario(req, res) {
 
     /////////////
     var body = req.body;
-    var usuario = new Credential({...body});
-    usuario.password = bcrypt.hashSync(body.password, 10);
-    usuario.save(async (err, usuarioGuardado) => {
+    var authentication = new Authentication({...body});
+
+    authentication.password = bcrypt.hashSync(body.password, 10);
+    authentication.save( (err, authenticationStored) => {
         if (err) {
             
             return res.status(400).json({
@@ -183,12 +153,28 @@ function crearUsuario(req, res) {
                 errors: err
             });
         }
-        var token = jwt.sign({usuario: usuario}, SEED, {expiresIn: 14400}); // 4 horas
-        res.status(201).json({
-            ok: true,
-            usuario: usuarioGuardado,
-            token: token
+        var usuario = new Usuario({...body});
+        usuario.name = body.name || '';
+        usuario.middlename = body.middlename || '';
+        usuario.surname = usuario.surname || usuario.name;
+        usuario._id = authentication._id;
+        console.log(usuario);
+        usuario.save((errUs, userStored) => {
+            var token = jwt.sign({usuario: userStored}, SEED, {expiresIn: 14400}); // 4 horas
+            if(errUs){
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al crear usuario',
+                    errors: errUs
+                });
+            }
+            res.status(201).json({
+                ok: true,
+                usuario: userStored,
+                token: token
+            });
         });
+
     });
 }
 
@@ -197,7 +183,7 @@ function crearUsuario(req, res) {
 function cambiarPassword(req, res) {
     var id = req.params.id;
     var body = req.body;
-    Credential.findById(id, (err, usuario) => {
+    Authentication.findById(id, (err, usuario) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -213,6 +199,7 @@ function cambiarPassword(req, res) {
             });
         }
         usuario.password = bcrypt.hashSync(body.password, 10);
+
         usuario.save( (err, usuarioGuardado) => {
             if (err) {
                 return res.status(400).json({
@@ -225,6 +212,8 @@ function cambiarPassword(req, res) {
                 _id: usuarioGuardado._id,
                 name: usuarioGuardado.name,
                 surname: usuarioGuardado.surname,
+                middlename: usuarioGuardado.middlename,
+                lastname: usuarioGuardado.lastname,
                 email: usuarioGuardado.email,
                 img: usuarioGuardado.img,
                 role: usuarioGuardado.role
@@ -247,30 +236,25 @@ function getUserFromToken(req, res) {
     res.status(200).json(req.usuario);
 };
 
+/**
+ * Valida previamente en el middleware que el token es valido, si este
+ * @param req
+ * @param res
+ */
 function verifyUser(req, res) {
-
-    const token = req.get('authorization')?.split(' ')[1] || '';
-
-
-    jwt.verify(token, SEED, (err, decoded) => {
-        
-        if (err) {
-            return res.status(401).json({
-                ok: false,
-                mensaje: 'Token incorrecto',
-                errors: err
+        if(!req.usuario){
+            res.status(400).json({
+                authenticated: false,
+                error: "No se tiene informacion del token en el header"
             });
         }
-
-        var tokenNew = jwt.sign({usuario: decoded.usuario}, SEED, payloadJwt);
+        var tokenNew = jwt.sign({usuario: req.usuario}, SEED, payloadJwt);
 
         res.status(200).json({
             authenticated: true,
             token: tokenNew
-            //usuario: decoded.usuario,
-            //partner: decoded.partner
         });
-    });
+
 
 };
 
@@ -304,63 +288,11 @@ async function verificaPartner(host, id) {
 
 
 
-function signByContrato(req, res) {
-    var body = req.body;
-    
-    Contrato.findOne({numeroContrato: body.numeroContrato})
-        //.populate({
-        //path: 'empresa',
-        //  select: '_id orgEmpresa'
-        //})
-
-        .exec((err, ContratoDB) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al buscar Contrato',
-                    errors: err
-                });
-            }
-
-            if (!ContratoDB) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Credenciales incorrectas - numero de Contrato',
-                    errors: err
-                });
-            }
-
-            if (!bcrypt.compareSync(body.password, ContratoDB.password)) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Credenciales incorrectas - password',
-                    errors: err
-                });
-            }
-
-            // Crear un token!!!
-            ContratoDB.password = ':)';
-
-
-            var token = jwt.sign({contrato: ContratoDB}, SEED, payloadJwt); // 4 horas
-
-
-            res.status(200).json({
-                ok: true,
-                contrato: ContratoDB,
-                token: token,
-                //_id: usuarioDB._id,
-                //menu: obtenerMenu(usuarioDB.role),
-                payload: payload
-            });
-        })
-};
-
 function resetPassword(req, res) {
     var body = req.body;
 
 
-    Credential.findOne({email: body.email})
+    Authentication.findOne({email: body.email})
         .select('email nombre')
         .exec((err, userBBD) => {
             if (err) {
@@ -377,7 +309,7 @@ function resetPassword(req, res) {
                 let pwdEncrypted = bcrypt.hashSync(newPwd, 10);
 
 
-                Credential.findByIdAndUpdate(userBBD?._id, {password: pwdEncrypted}, {},
+                Authentication.findByIdAndUpdate(userBBD?._id, {password: pwdEncrypted}, {},
                     (err, nuser) => {
                         userBBD.password = newPwd;
                         //MailController.enviarCorreoNuevoPassword
@@ -413,8 +345,6 @@ module.exports = {
     crearUsuario,
     verifyUser,
     getUserFromToken,
-    renuevaToken,
-    signByContrato,
     resetPassword,
     cambiarPassword,
     updateInfo

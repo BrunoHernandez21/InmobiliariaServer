@@ -11,6 +11,15 @@ var estadoTarea = {
     message: '{VALUE} no es un estatus valido'
 };
 
+var clasificacionZona = {
+    values: ['HABITACIONAL','COMERCIAL', 'INDUSTRIAL', 'MIXTO'],
+    message: '{VALUE} no es un estatus valido'
+};
+
+var regimenPropiedad = {
+    values: ['PARTICULAR','CONDOMINIO', 'EJIDAL', 'COMUNAL', 'OTRO'],
+    message: '{VALUE} no es un estatus valido'
+};
 
 var TareaSchema = new Schema({
     nombreCliente: {type:String},
@@ -27,6 +36,19 @@ var TareaSchema = new Schema({
     firma:{ type: String},
 
     direccion: String,
+    direccionCompuesta: {
+                        calle: String,
+                        numeroExterior: String,
+                        colonia: String,
+                        estado: String,
+                        municipio: String,
+                        cp: String
+                        },
+    clasificacionZona: {type: String, enum: clasificacionZona, default: 'HABITACIONAL'},
+    usoSuelo: {type: String, enum: clasificacionZona, default: 'HABITACIONAL'},
+    regimenPropiedad: {type: String, enum: regimenPropiedad, default: 'PARTICULAR'},
+    regimenPropiedadOtro: String,
+
     geolocation:{ latitud: Number, longitud: Number},
     descuento:{ type: String},
     duracion:{ type: String},
