@@ -69,41 +69,52 @@ function login(req, res) {
                     errors: err
                 });
             }
-            // instancia la informacion obtenida en un mapa user
+            //
+            let authUp = {};
+            authUp.messagingToken=req.messagingToken;
+            authUp.lastSession = new Date();
+            Authentication.findByIdAndUpdate(auth._id, authUp).exec((err) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al buscar id',
+                        errors: err
+                    });
+                }
 
+                let usuario = {
+                    email: auth.email,
+                    name: auth.user?.name,
+                    surname: auth.user?.surname,
+                    middlename: auth.user?.middlename,
+                    lastname: auth.user?.lastname,
+                    _id: auth.user._id,
+                    role: auth.role,
+                    roles: auth.roles,
+                    img: auth.user.img
+                };
 
-            // y lo mete dentro de otro mapa payload con la llave usuario
-            let usuario = {
-                email: auth.email,
-                name: auth.user?.name,
-                surname: auth.user?.surname,
-                middlename: auth.user?.middlename,
-                lastname: auth.user?.lastname,
-                _id: auth.user._id,
-                role: auth.role,
-                roles: auth.roles,
-                img: auth.user.img
-            };
-
-            let payload = {
-                usuario
-            };
-            //comprueba si la contraseña es correcta
-            if (!bcrypt.compareSync(body.password, auth.password)) {
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Credenciales incorrectas',
-                    errors: err
+                let payload = {
+                    usuario
+                };
+                //comprueba si la contraseña es correcta
+                if (!bcrypt.compareSync(body.password, auth.password)) {
+                    return res.status(400).json({
+                        ok: false,
+                        mensaje: 'Credenciales incorrectas',
+                        errors: err
+                    });
+                }
+                // inicia secion con el usuario en payload
+                var token = jwt.sign(payload, SEED, payloadJwt);
+                //ok
+                res.status(200).json({
+                    ok: true,
+                    user: usuario,
+                    token: token
                 });
-            }
-            // inicia secion con el usuario en payload
-            var token = jwt.sign(payload, SEED, payloadJwt);
-            //ok
-            res.status(200).json({
-                ok: true,
-                user: usuario,
-                token: token
             });
+
         });
 };
 

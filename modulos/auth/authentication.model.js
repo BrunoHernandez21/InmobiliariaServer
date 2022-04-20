@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var uniqueValidator = require('mongoose-unique-validator');
+const {DateTime} = require("pool-mysql/model/Types");
 //esquema pata mongoose
 var Schema = mongoose.Schema;
 
@@ -20,9 +21,9 @@ var authenticationSchema = new Schema({
     verify:  { type: Boolean, required: true, default:false},
     estatus: { type: Boolean, required: true, default:true},
 
-    pushNotificationToken: String,
+    messagingToken: String,
     user : {  type: Schema.Types.ObjectId, ref: 'Usuario', required: false },
-
+    lastSession: Date,
     // control fields
     partner : {  type: Schema.Types.ObjectId, ref: 'Partner', required: false },
     owner : {  type: Schema.Types.ObjectId, ref: 'Usuario', required: false },
