@@ -1,7 +1,7 @@
 var jwt = require('jsonwebtoken');
 
 var SEED = require('../config/config').SEED;
-var ApiKey = require('../models/administracion/api-key');
+var ApiKey = require('../modulos/admin/partners/api-key.model');
 const Authentication = require("../modulos/auth/authentication.model");
 
 exports.pushNotificationHeader = function(req, res, next) {

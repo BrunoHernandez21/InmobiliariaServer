@@ -3,10 +3,10 @@ var Schema = mongoose.Schema;
 
 
 var ApiKeySchema = new Schema({
-    host: String,
+    origen: { type: String, unique: true, required: [true, 'El host es necesario'] },
     apikey: String,
-    partner : {  type: Schema.Types.ObjectId, ref: 'Partner' },  
-
+    type: String,
+    partner : {  type: Schema.Types.ObjectId, ref: 'Partner' }
 });
 
 

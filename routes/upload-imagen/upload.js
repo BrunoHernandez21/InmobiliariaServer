@@ -8,7 +8,7 @@ var Imagen = require('../../models/upload-imagen/imagen');
 var Usuario = require('../../modulos/auth/authentication.model');
 var Empresa = require('../../models/administracion/empresa');
 var Tarjeta = require('../../models/tarjetas/tarjeta');
-var Partner = require('../../models/administracion/partner');
+var Partner = require('../../modulos/admin/partners/partner.model');
 var Producto = require('../../models/renton/producto');
 var DownloadControler= require ('../../controllers/administracion/usuarios');
 // default options

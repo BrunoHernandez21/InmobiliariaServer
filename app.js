@@ -31,7 +31,7 @@ var uploadRoutes = require ('./modulos/archivos/upload.routes');
 app.use('/api/auth', auth);
 app.use('/api/tarea', tareasRoutes);
 app.use('/api/tareas', catalogosRoutes);
-app.use('/api/usuario', usuariosRoutes);
+app.use('/api', usuariosRoutes);
 
 app.use('/api/archives', uploadRoutes);
 

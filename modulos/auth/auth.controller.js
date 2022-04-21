@@ -1,7 +1,7 @@
 var bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 var jwt = require('jsonwebtoken');
-var Partner = require('../../models/administracion/partner');
+var Partner = require('../admin/partners/partner.model');
 var SEED = require('../../config/config').SEED;
 var Authentication = require('./authentication.model');
 var Usuario = require('../admin/usuarios/usuario.model');

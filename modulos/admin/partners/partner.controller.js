@@ -1,6 +1,6 @@
 'use strict'
 
-var Partner = require('../admin/partners/partner.model');
+var Partner = require('../../models/administracion/partner');
 var mongoose = require('mongoose');
 
 
@@ -11,21 +11,7 @@ function crearNuevoPartner(req, res){
 
     var body = req.body;
 
-    var partner = new Partner({
-
-        nombre: body.nombre,
-        host: body.host,
-        direccion: body.direccion,
-        facebook: body.facebook,
-        app: body.app,
-        www: body.www,
-        tel: body.tel,
-        cel: body.cel,
-        wa: body.wa,
-        publicApiKey: body.publicApiKey,
-        privateApiKey: body.privateApiKey,
-        owner : body.owner,
-    });
+    var partner = new Partner({...body});
 
     partner.save((err, partnerGuardado) => {
         if (err) {
@@ -278,7 +264,7 @@ function obtenerConfiguracionPartner(req, res){
     console.log('host del config : '+host);
 
     Partner.findOne({host: host})
-        .select('nombre host img theme background colorTheme')
+        .select('nombre img theme background colorTheme')
         .populate({ path: 'relatedPartner',
             select: 'nombre host img theme background colorTheme' })
         .exec(

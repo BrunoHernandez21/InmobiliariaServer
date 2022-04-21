@@ -1,6 +1,6 @@
 'use strict'
 var Usuario = require('./usuario.model');
-var Partner = require('../../../models/administracion/partner');
+var Partner = require('../partners/partner.model');
 var mongoose = require('mongoose');
 
 
@@ -102,48 +102,11 @@ function actualizarUsuario(req, res){
 function crearUsuario(req, res){
     console.log('==========================================  CREAR USUARIO ====================================================');
     var body = req.body;
-    console.log('body :>> ', body);
-    var isFirebaseUser = false;
-    if (body.isFirebaseUser !== null && body.isFirebaseUser !== undefined) {
-        isFirebaseUser = body.isFirebaseUser;
-    }
-    var usuario = new Usuario({
-       
-        nombre: body.nombre,
-        surname: body.surname,
-        email: body.email,
-        password: '',
-        role: body.role,
-        fechaNacimiento : body.fechaNacimiento,
-        direccion : body.direccion,
-        longitud : body.longitud,
-        latitud :  body.latitud,
-        tel: body.tel,
-        cel: body.cel,
-        partner : body.partner,
-        owner : body.owner,
-        rfc : body.rfc,
-        urlMaps : body.urlMaps,
-        numeroCliente : body.numeroCliente,
-        numeroVendedor : body.numeroVendedor,
-        telefonoReferenciaUno : body.telefonoReferenciaUno,
-        telefonoReferenciaDos : body.telefonoReferenciaDos,
-        nombreReferenciaUno : body.nombreReferenciaUno,
-        nombreReferenciaDos : body.nombreReferenciaDos,
-        observaciones : body.observaciones,
-        sexo : body.sexo,
-        comisionVendedor : body.comisionVendedor,
-        estatus:  body.estatus,
-        uidFirebase:  body.uidFirebase,
-        clavePublicaConekta:  body.clavePublicaConekta,
-        clavePrivadaConekta:  body.clavePrivadaConekta,
+
+    var usuario = new Usuario({...body
     });
     console.log('usuario :>> ', usuario);
-    if (body.password !== null && body.password !== undefined && body.password !== '') {
-        usuario.password = bcrypt.hashSync(body.password, 10);
-    }else{
-        usuario.password = bcrypt.hashSync('123456', 10);  
-    }
+
 
     usuario.save(async(err, usuarioGuardado) => {
 
@@ -156,36 +119,10 @@ function crearUsuario(req, res){
             });
         }
 
-        if (isFirebaseUser) {
-            try {
-                var user = await fireApp.auth().createUser(
-                    {
-                        email: body.email,
-                        phoneNumber: body.cel,
-                        password: (body.password !== null && body.password !== undefined && body.password !== '') ? body.password : '123456',
-                        displayName: (body.nombre +' '+ body.surname),
-                    }
-                ).then(function(userRecord) {
-                    console.log("Successfully created user", userRecord.toJSON());
-                    return userRecord.toJSON();
-                })
-                .catch(function(error) {
-                    console.log("Error create user:", error);
-                    return error.toJSON();
-                });
-                let userne = usuarioGuardado;
-                userne.uidFirebase = user.uid;
-                await Usuario.findByIdAndUpdate(usuarioGuardado?._id, userne, {new:true});
-            } catch (error) {
-            }
-        }
-
-        var token = jwt.sign({ usuario: usuario }, SEED, { expiresIn: 14400 }); // 4 horas
 
         res.status(201).json({
             ok: true,
-            usuario: usuarioGuardado,
-            token: token
+            usuario: usuarioGuardado
         });
     });
 }
