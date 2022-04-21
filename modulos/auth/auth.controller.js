@@ -6,7 +6,7 @@ var SEED = require('../../config/config').SEED;
 var Authentication = require('./authentication.model');
 var Usuario = require('../admin/usuarios/usuario.model');
 
-
+var MailController = require('../mail/mail.controller');
 const SESSION_EXPIRES_AT = require('../../config/config').SESSION_EXPIRES_AT;
 //determina el tiempo para que expire la session
 const payloadJwt = {
@@ -301,11 +301,35 @@ async function verificaPartner(host, id) {
 }
 
 
+async function  resetPasswordSteps(email){
+    console.log(email);
+
+    let auth = await Authentication.findOne({email}) .select('email nombre').populate("user");
+    if(auth){
+        let newPwd = Math.random().toString(36).substr(2, 8);
+        let pwdEncrypted = bcrypt.hashSync(newPwd, 10);
+        await Authentication.findByIdAndUpdate(auth?._id, {password: pwdEncrypted});
+
+        let userSend = {name:auth.user?.name, email: email , password:newPwd};
+        //console.log(userSend)
+        let resCorreo = await MailController.enviarCorreoNuevoPassword(userSend);
+        //console.log(resCorreo);
+        if(resCorreo.estatus=='error'){
+            return resCorreo;
+        }
+    }
+    //console.log(auth);
+}
 
 function resetPassword(req, res) {
     var body = req.body;
-
-
+    resetPasswordSteps(body.email).then( data =>{
+        return res.status(200).json({
+            status: 'ok',
+            mensaje: 'Envio exitoso',
+        });
+    });
+/*
     Authentication.findOne({email: body.email})
         .select('email nombre')
         .exec((err, userBBD) => {
@@ -319,37 +343,29 @@ function resetPassword(req, res) {
 
             if (userBBD) {
                 let newPwd = Math.random().toString(36).substr(2, 8);
-                
                 let pwdEncrypted = bcrypt.hashSync(newPwd, 10);
-
-
                 Authentication.findByIdAndUpdate(userBBD?._id, {password: pwdEncrypted}, {},
                     (err, nuser) => {
                         userBBD.password = newPwd;
-                        //MailController.enviarCorreoNuevoPassword
-                        (userBBD).then(data => {
-                            res.status(201).json({
-                                message: 'Se ha enviado un correo con tu nuevo password',
+                         MailController.enviarCorreoNuevoPassword
+                        (userBBD).then( data => {
 
-                                status: 'ok'
-                            }/*, err => {
-                                res.status(500).json({
-                                    message: 'Ocurrió un error al enviar el correo',
-                                    error: err,
-                                    status: 'ok'
-                                });
-                            }*/);
+                            }).catch(error=>{
+
                         });
+
                     });
             } else {
 
 
                 res.status(400).json({
-                    message: 'Se ha enviado un correo con tu nuevo password',
+                    message: 'No se ha podido enviado un correo con tu nuevo password',
                     status: 'error'
                 });
             }
         });
+
+ */
 }
 
 

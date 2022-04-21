@@ -4,11 +4,11 @@ module.exports.SESSION_EXPIRES_AT = '2d';
 
 //con exactitud que rayos hace esto?
 module.exports.configMail = {
-    host: 'mail.inc4.uno',
+    host: 'mail.inclusive.com.mx',
     port: 465,
     secure: true, // true for 465, false for other ports
     auth: {
-        user: 'cotizarenton@inc4.uno', // generated ethereal user
+        user: 'correo@inclusive.com.mx', // generated ethereal user
         pass: 'o+&]c*8%Rwd&' // generated ethereal password
     }
 }
