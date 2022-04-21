@@ -20,7 +20,7 @@ app.post('/sign-up',[
 
 app.post('/renuevatoken',       [mdAutenticacion.verificaToken],    AuthController.verifyUser);
 app.put('/update-password/:id', [mdAutenticacion.verificaToken],    AuthController.cambiarPassword);
-app.put('/usuario/:id',         [mdAutenticacion.verificaToken],    AuthController.updateInfo);
+//app.put('/usuario/:id',         [mdAutenticacion.verificaToken],    AuthController.updateInfo);
 app.post('/reset-password',                                         AuthController.resetPassword);
 
 

@@ -3,13 +3,15 @@ var mdAutenticacion = require('../../../middlewares/autenticacion');
 var app = express();
 var UsuariosControler= require ('./usuarios.controller');
 
+
+app.get('/lista', [mdAutenticacion.verificaToken], UsuariosControler.obtenerUsuarios);
+app.get('/lista/:page', [mdAutenticacion.verificaToken], UsuariosControler.obtenerUsuarios);
+app.get('/lista/:page/:pageSize', [mdAutenticacion.verificaToken], UsuariosControler.obtenerUsuarios);
+
+
 app.get('/:id', [mdAutenticacion.verificaToken], UsuariosControler.obtenerPorIdUsuario);
 app.get('/', [mdAutenticacion.verificaToken], UsuariosControler.obtenerPorIdUsuario);
 
-app.get('/lista', [mdAutenticacion.verificaToken], UsuariosControler.obtenerUsuarios);
-
-app.get('/lista/:page', [mdAutenticacion.verificaToken], UsuariosControler.obtenerUsuarios);
-app.get('/lista/:page/:pageSize', [mdAutenticacion.verificaToken], UsuariosControler.obtenerUsuarios);
 
 //app.post('//', [mdAutenticacion.verificaToken, mdAutenticacion.verificaADMIN_ROLE], UsuariosControler.obtenerUsuariosConPaginacion);//5 en 5
 

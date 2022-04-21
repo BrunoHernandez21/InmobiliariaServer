@@ -117,7 +117,7 @@ function login(req, res) {
 
         });
 };
-
+/*
 function updateInfo(req,res){
     var id = req.params.id;
     var body = req.body;
@@ -135,8 +135,34 @@ function updateInfo(req,res){
                 body:body
         });
     });
-}
+}*/
 
+async function creaUsuarioAsync(body){
+    var usuario = new Usuario({...body});
+    usuario.name = body.name || '';
+    usuario.middlename = body.middlename || '';
+    usuario.surname = usuario.surname || usuario.name;
+    console.log(usuario);
+
+
+    let userStored = await Usuario.findOne({email: usuario.email});
+    if(!userStored){
+        userStored = await usuario.save();
+    }
+    var authentication = new Authentication({...body});
+    authentication.user = userStored._id;
+    authentication.password = bcrypt.hashSync(body.password, 10);
+    let authStored = await authentication.save().then(data=>{return {data} }).catch(error=>{return {error}});
+    console.log(authStored);
+    if(!authStored.error){
+        var token = jwt.sign({usuario: userStored}, SEED, {expiresIn: 14400}); // 4 horas
+
+        return {usuario, token, ok: true};
+    }else{
+        return {  ok: false, mensaje: 'Error al crear usuario' };
+    }
+
+}
 
 // Crear un nuevo usuario
 function crearUsuario(req, res) {
@@ -152,43 +178,11 @@ function crearUsuario(req, res) {
         })
     }
 
-    /////////////
     var body = req.body;
 
-    var usuario = new Usuario({...body});
-    usuario.name = body.name || '';
-    usuario.middlename = body.middlename || '';
-    usuario.surname = usuario.surname || usuario.name;
-    console.log(usuario);
-    usuario.save((errUs, userStored) => {
-        var token = jwt.sign({usuario: userStored}, SEED, {expiresIn: 14400}); // 4 horas
-        if(errUs){
-            return res.status(400).json({
-                ok: false,
-                mensaje: 'Error al crear usuario',
-                errors: errUs
-            });
-        }
-        var authentication = new Authentication({...body});
-        authentication.user = userStored._id;
-        authentication.password = bcrypt.hashSync(body.password, 10);
-        authentication.save( (err, authenticationStored) => {
-            if (err) {
-
-                return res.status(400).json({
-                    ok: false,
-                    mensaje: 'Error al crear usuario',
-                    errors: err
-                });
-            }
-            res.status(201).json({
-                ok: true,
-                usuario: userStored,
-                token: token
-            });
-        });
+    creaUsuarioAsync(body).then( data => {
+        return  res.status(200).json(data);
     });
-
 
 }
 
@@ -197,7 +191,7 @@ function crearUsuario(req, res) {
 function cambiarPassword(req, res) {
     var id = req.params.id;
     var body = req.body;
-    Authentication.findById(id, (err, usuario) => {
+    Authentication.findOne({user: id}, (err, usuario) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
@@ -223,13 +217,8 @@ function cambiarPassword(req, res) {
                 });
             }
             let userx = {
-                _id: usuarioGuardado._id,
-                name: usuarioGuardado.name,
-                surname: usuarioGuardado.surname,
-                middlename: usuarioGuardado.middlename,
-                lastname: usuarioGuardado.lastname,
+                _id: usuarioGuardado.user,
                 email: usuarioGuardado.email,
-                img: usuarioGuardado.img,
                 role: usuarioGuardado.role
             };
             var tokenUser = jwt.sign({usuario: userx}, SEED, {expiresIn: 14400});
@@ -251,7 +240,8 @@ function getUserFromToken(req, res) {
 };
 
 /**
- * Valida previamente en el middleware que el token es valido, si este
+ * Valida previamente en el middleware que el token es valido, si este es valido se envia
+ * a traves del atributo usuario del request.
  * @param req
  * @param res
  */
@@ -301,7 +291,7 @@ async function verificaPartner(host, id) {
 }
 
 
-async function  resetPasswordSteps(email){
+async function  resetPasswordAsync(email){
     console.log(email);
 
     let auth = await Authentication.findOne({email}) .select('email nombre').populate("user");
@@ -323,49 +313,13 @@ async function  resetPasswordSteps(email){
 
 function resetPassword(req, res) {
     var body = req.body;
-    resetPasswordSteps(body.email).then( data =>{
+    resetPasswordAsync(body.email).then( data =>{
         return res.status(200).json({
             status: 'ok',
             mensaje: 'Envio exitoso',
         });
     });
-/*
-    Authentication.findOne({email: body.email})
-        .select('email nombre')
-        .exec((err, userBBD) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error al buscar usuario',
-                    errors: err
-                });
-            }
 
-            if (userBBD) {
-                let newPwd = Math.random().toString(36).substr(2, 8);
-                let pwdEncrypted = bcrypt.hashSync(newPwd, 10);
-                Authentication.findByIdAndUpdate(userBBD?._id, {password: pwdEncrypted}, {},
-                    (err, nuser) => {
-                        userBBD.password = newPwd;
-                         MailController.enviarCorreoNuevoPassword
-                        (userBBD).then( data => {
-
-                            }).catch(error=>{
-
-                        });
-
-                    });
-            } else {
-
-
-                res.status(400).json({
-                    message: 'No se ha podido enviado un correo con tu nuevo password',
-                    status: 'error'
-                });
-            }
-        });
-
- */
 }
 
 
@@ -377,5 +331,5 @@ module.exports = {
     getUserFromToken,
     resetPassword,
     cambiarPassword,
-    updateInfo
+    //updateInfo
 };
