@@ -7,6 +7,7 @@ var Authentication = require('./authentication.model');
 var Usuario = require('../admin/usuarios/usuario.model');
 
 var MailController = require('../mail/mail.controller');
+const mongoose = require("mongoose");
 const SESSION_EXPIRES_AT = require('../../config/config').SESSION_EXPIRES_AT;
 //determina el tiempo para que expire la session
 const payloadJwt = {
@@ -191,7 +192,7 @@ function crearUsuario(req, res) {
 function cambiarPassword(req, res) {
     var id = req.params.id;
     var body = req.body;
-    Authentication.findOne({user: id}, (err, usuario) => {
+    Authentication.findOne({user: mongoose.Types.ObjectId(id)}, (err, usuario) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
