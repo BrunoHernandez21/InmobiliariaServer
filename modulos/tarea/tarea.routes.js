@@ -5,7 +5,7 @@ const mdAutenticacion = require("../../middlewares/autenticacion");
 
 ////////////Tareas basicas
 //Crear
-app.post('/', [mdAutenticacion.verificaToken],TareaController.crear);                                                               //✓
+app.post('/', [mdAutenticacion.verificaToken],TareaController.crear);                               //✓
 //Actualizar
 app.put('/:id',[mdAutenticacion.verificaToken],TareaController.actualizarTarea)                     //✓
 //eliminar

@@ -118,7 +118,7 @@ function consultaPaginado(req, res){
         if(body.nombreCliente)
             findTerms ['$and'].push({'nombreCliente': new RegExp(body.nombreCliente, 'i')});
         if(body.estado)
-            findTerms ['$and'].push({'estado': {$in :["BORRADOR"]}});
+            findTerms ['$and'].push({'estado': {$in :body.estado}});
         if(body.estatus)
             findTerms ['$and'].push({'estatus': {$in :body.estatus}});
         if(body.fechaAvaluo)
@@ -174,7 +174,7 @@ function consultaPaginado(req, res){
     if( req.usuario?._id)
             findTerms ['$and'].push({'usuario':  mongoose.Types.ObjectId(req.usuario?._id) });
     findTerms ['$and'].push({'estatus':"ACTIVA"});
-    findTerms ['$and'].push({'estado': {$in :["PROCESO","SIN_ASIGNAR"]}});
+    findTerms ['$and'].push({'estado': {$in :["PROCESO"]}});
 
     Tarea.find(findTerms).exec((err, data)=>{
         if(err){

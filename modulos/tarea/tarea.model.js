@@ -7,7 +7,7 @@ var estatusTarea = {
     message: '{VALUE} no es un estatus valido'
 };
 var estadoTarea = {
-    values: [,'CANCELADA','BORRADOR', 'SIN_ASIGNAR', 'PROCESO','TERMINADA', 'APROBANDO'],
+    values: ['CANCELADA','BORRADOR', 'SIN_ASIGNAR', 'PROCESO','TERMINADA', 'APROBANDO'],
     message: '{VALUE} no es un estatus valido'
 };
 
