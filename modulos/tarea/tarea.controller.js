@@ -123,6 +123,8 @@ function consultaPaginado(req, res){
             findTerms ['$and'].push({'estatus': {$in :body.estatus}});
         if(body.fechaAvaluo)
             findTerms ['$and'].push({'fechaAvaluo': body.fechaAvaluo});
+        if(body.direccion)
+            findTerms ['$and'].push({'direccion': new RegExp(body.direccion, 'i')});
     }
     if(findTerms['$and'].length===0){
       delete  findTerms['$and'] ;
